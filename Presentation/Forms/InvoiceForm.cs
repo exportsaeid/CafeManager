@@ -430,7 +430,7 @@ namespace CafeManager
         }
 
         // ============================================================
-        // ✅ متد اصلاح شده HandleSettlement - کاملاً ایمن
+        // ✅ متد HandleSettlement
         // ============================================================
         private void HandleSettlement(int id, bool settled, string method, DataGridViewRow row)
         {
@@ -439,7 +439,6 @@ namespace CafeManager
                 var invoice = GetInvoiceById(id);
                 if (invoice == null) return;
 
-                // ===== ایجاد یک کپی از پرداخت‌های فعلی =====
                 var originalPayments = invoice.Payments?.Select(p => new Payment
                 {
                     Method = p.Method,
@@ -447,24 +446,20 @@ namespace CafeManager
                     PaymentDate = p.PaymentDate
                 }).ToList() ?? new List<Payment>();
 
-                // ===== نمایش دیالوگ پرداخت ترکیبی =====
                 using (var dialog = new PaymentDialog(invoice))
                 {
                     try
                     {
-                        // ===== نمایش دیالوگ =====
                         var result = dialog.ShowDialog(this);
 
                         if (result == DialogResult.OK)
                         {
-                            // ===== دریافت پرداخت‌ها از دیالوگ =====
                             var payments = dialog.Payments;
                             if (payments != null && payments.Count > 0)
                             {
                                 invoice.Payments = payments.ToList();
                                 CafeManager.UpdateInvoice(invoice);
 
-                                // ===== بررسی تسویه کامل =====
                                 double totalPaid = payments.Sum(p => p.Amount);
                                 if (totalPaid >= invoice.TotalAmount)
                                 {
@@ -489,12 +484,9 @@ namespace CafeManager
                         }
                         else
                         {
-                            // ===== کاربر Cancel کرده است =====
-                            // ===== بازگرداندن پرداخت‌های قبلی =====
                             invoice.Payments = originalPayments;
                             CafeManager.UpdateInvoice(invoice);
 
-                            // ===== تنظیم روش پرداخت بر اساس پرداخت‌های قبلی =====
                             if (originalPayments.Count == 0)
                                 row.Cells["PayMethod"].Value = "نقدی";
                             else if (originalPayments.Count > 1)
@@ -510,7 +502,6 @@ namespace CafeManager
                         MessageBox.Show($"خطا در پرداخت: {ex.Message}", "خطا",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                        // ===== بازگرداندن وضعیت قبلی =====
                         invoice.Payments = originalPayments;
                         CafeManager.UpdateInvoice(invoice);
                         RefreshInvoiceGrid(id);
@@ -519,7 +510,6 @@ namespace CafeManager
                 return;
             }
 
-            // ===== روش‌های پرداخت معمولی =====
             try
             {
                 CafeManager.UpdateSettlementStatus(id, settled, method);
@@ -892,105 +882,192 @@ namespace CafeManager
 
         #region رویدادهای چاپ
 
+
         private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
         {
             if (_currentSelectedInvoice == null) return;
 
             Graphics g = e.Graphics;
 
-            Font titleFont = new Font("Tahoma", 10, FontStyle.Bold);
-            Font headerFont = new Font("Tahoma", 8, FontStyle.Bold);
-            Font normalFont = new Font("Tahoma", 8);
+            // تنظیمات کیفیت بالا
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 
-            float pageWidth = 300f;
-            float y = 8f;
+            // فونت‌ها
+            Font titleFont = new Font("Tahoma", 13, FontStyle.Bold);
+            Font tableFont = new Font("Tahoma", 7, FontStyle.Bold);
+            Font totalFont = new Font("Tahoma", 8, FontStyle.Bold);
+            Font footerFont = new Font("Tahoma", 8);
 
-            StringFormat center = new StringFormat { Alignment = StringAlignment.Center };
+            float pageWidth = 320f;
+            float y = 15f;
+            float padding = 6f;
 
-            g.DrawString("کافه گلستان", titleFont, Brushes.Black, pageWidth / 2, y, center);
-            y += 22;
-
-            g.DrawString($"فاکتور شماره: {_currentSelectedInvoice.Id}", normalFont, Brushes.Black, pageWidth / 2, y, center);
-            y += 14;
-
-            g.DrawString($"مشتری: {_currentSelectedInvoice.CustomerName}", normalFont, Brushes.Black, pageWidth / 2, y, center);
-            y += 14;
-
-            g.DrawString($"میز: {_currentSelectedInvoice.TableNumber}", normalFont, Brushes.Black, pageWidth / 2, y, center);
-            y += 14;
-
-            g.DrawString(ConvertToPersianDate(_currentSelectedInvoice.OrderDate), normalFont, Brushes.Black, pageWidth / 2, y, center);
-            y += 22;
-
-            g.DrawLine(Pens.Black, 15, y, pageWidth - 15, y);
-            y += 12;
-
-            float tableWidth = 272f;
-            float tableLeft = (pageWidth - tableWidth) / 2;
-
-            float colRow = 36f;
-            float colName = 108f;
-            float colPrice = 48f;
-            float colQty = 34f;
-            float colTotal = 46f;
-
-            float xRight = tableLeft + tableWidth;
-            float xRow = xRight - colRow;
-            float xName = xRow - colName;
-            float xPrice = xName - colPrice;
-            float xQty = xPrice - colQty;
-            float xTotal = xQty - colTotal;
-
-            float rowHeight = 19f;
-
-            var centerFormat = new StringFormat
+            // فرمت‌های RTL
+            StringFormat centerRTL = new StringFormat
             {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center,
                 FormatFlags = StringFormatFlags.DirectionRightToLeft
             };
 
-            g.FillRectangle(Brushes.LightGray, tableLeft, y, tableWidth, rowHeight);
-            g.DrawRectangle(Pens.Black, tableLeft, y, tableWidth, rowHeight);
+            StringFormat rightRTL = new StringFormat
+            {
+                Alignment = StringAlignment.Far,
+                LineAlignment = StringAlignment.Center,
+                FormatFlags = StringFormatFlags.DirectionRightToLeft
+            };
 
-            g.DrawLine(Pens.Black, xRow, y, xRow, y + rowHeight);
-            g.DrawLine(Pens.Black, xName, y, xName, y + rowHeight);
-            g.DrawLine(Pens.Black, xPrice, y, xPrice, y + rowHeight);
-            g.DrawLine(Pens.Black, xQty, y, xQty, y + rowHeight);
+            // ============================================================
+            // هدر
+            // ============================================================
+            g.DrawString("☕ کافه گلستان", titleFont, Brushes.Black, pageWidth / 2, y, centerRTL);
+            y += 28;
 
-            g.DrawString("ردیف", headerFont, Brushes.Black, new RectangleF(xRow, y, colRow, rowHeight), centerFormat);
-            g.DrawString("نام کالا", headerFont, Brushes.Black, new RectangleF(xName, y, colName, rowHeight), centerFormat);
-            g.DrawString("قیمت", headerFont, Brushes.Black, new RectangleF(xPrice, y, colPrice, rowHeight), centerFormat);
-            g.DrawString("تعداد", headerFont, Brushes.Black, new RectangleF(xQty, y, colQty, rowHeight), centerFormat);
-            g.DrawString("مبلغ", headerFont, Brushes.Black, new RectangleF(xTotal, y, colTotal, rowHeight), centerFormat);
+            string headerLine1 = $"فاکتور شماره: {_currentSelectedInvoice.Id}     تاریخ: {ConvertToPersianDate(_currentSelectedInvoice.OrderDate)}";
+            g.DrawString(headerLine1, tableFont, Brushes.Black, pageWidth / 2, y, centerRTL);
+            y += 18;
+
+            string headerLine2 = $"مشتری: {_currentSelectedInvoice.CustomerName}     میز: {_currentSelectedInvoice.TableNumber}";
+            g.DrawString(headerLine2, tableFont, Brushes.Black, pageWidth / 2, y, centerRTL);
+            y += 24;
+
+            // ============================================================
+            // اندازه‌گیری طول متن برای هر ستون
+            // ============================================================
+            float maxMablagh = g.MeasureString("مبلغ", tableFont).Width;
+            float maxTedad = g.MeasureString("تعداد", tableFont).Width;
+            float maxGheymat = g.MeasureString("قیمت", tableFont).Width;
+            float maxName = g.MeasureString("نام کالا", tableFont).Width;
+            float maxRadif = g.MeasureString("ردیف", tableFont).Width;
+
+            int rowIndex = 1;
+            foreach (var item in _currentSelectedInvoice.Items)
+            {
+                maxMablagh = Math.Max(maxMablagh, g.MeasureString(item.TotalPrice.ToString("N0"), tableFont).Width);
+                maxTedad = Math.Max(maxTedad, g.MeasureString(item.Quantity.ToString(), tableFont).Width);
+                maxGheymat = Math.Max(maxGheymat, g.MeasureString(item.Product.Price.ToString("N0"), tableFont).Width);
+                maxName = Math.Max(maxName, g.MeasureString(item.Product.Name, tableFont).Width);
+                maxRadif = Math.Max(maxRadif, g.MeasureString(rowIndex.ToString(), tableFont).Width);
+                rowIndex++;
+            }
+
+            // ============================================================
+            // تنظیم عرض ستون‌ها
+            // ============================================================
+            float colMablagh = maxMablagh + padding;
+            float colTedad = maxTedad + padding;
+            float colGheymat = maxGheymat + padding;
+            float colName = maxName + padding;
+            float colRadif = maxRadif + padding;
+
+            float tableWidth = colMablagh + colTedad + colGheymat + colName + colRadif;
+
+            if (tableWidth > pageWidth - 20)
+            {
+                float scale = (pageWidth - 20) / tableWidth;
+                colMablagh *= scale;
+                colTedad *= scale;
+                colGheymat *= scale;
+                colName *= scale;
+                colRadif *= scale;
+                tableWidth = colMablagh + colTedad + colGheymat + colName + colRadif;
+            }
+
+            float tableLeft = (pageWidth - tableWidth) / 2;
+
+            float xMablagh = tableLeft;
+            float xTedad = xMablagh + colMablagh;
+            float xGheymat = xTedad + colTedad;
+            float xName = xGheymat + colGheymat;
+            float xRadif = xName + colName;
+
+            float rowHeight = 20f;
+
+            // ============================================================
+            // هدر جدول
+            // ============================================================
+            g.FillRectangle(new SolidBrush(Color.LightGray), tableLeft, y, tableWidth, rowHeight);
+            g.DrawRectangle(new Pen(Color.Black, 1.5f), tableLeft, y, tableWidth, rowHeight);
+
+            g.DrawLine(new Pen(Color.Black, 1.5f), xMablagh, y, xMablagh, y + rowHeight);
+            g.DrawLine(new Pen(Color.Black, 1.5f), xTedad, y, xTedad, y + rowHeight);
+            g.DrawLine(new Pen(Color.Black, 1.5f), xGheymat, y, xGheymat, y + rowHeight);
+            g.DrawLine(new Pen(Color.Black, 1.5f), xName, y, xName, y + rowHeight);
+            g.DrawLine(new Pen(Color.Black, 1.5f), xRadif, y, xRadif, y + rowHeight);
+
+            g.DrawString("مبلغ", tableFont, Brushes.Black, new RectangleF(xMablagh + 2, y, colMablagh - 4, rowHeight), centerRTL);
+            g.DrawString("تعداد", tableFont, Brushes.Black, new RectangleF(xTedad + 2, y, colTedad - 4, rowHeight), centerRTL);
+            g.DrawString("قیمت", tableFont, Brushes.Black, new RectangleF(xGheymat + 2, y, colGheymat - 4, rowHeight), centerRTL);
+            g.DrawString("نام کالا", tableFont, Brushes.Black, new RectangleF(xName + 2, y, colName - 4, rowHeight), centerRTL);
+            g.DrawString("ردیف", tableFont, Brushes.Black, new RectangleF(xRadif + 2, y, colRadif - 4, rowHeight), centerRTL);
 
             y += rowHeight;
 
+            // ============================================================
+            // آیتم‌های جدول
+            // ============================================================
             int i = 1;
+            bool alt = false;
             foreach (var item in _currentSelectedInvoice.Items)
             {
-                g.DrawRectangle(Pens.Black, tableLeft, y, tableWidth, rowHeight);
-                g.DrawLine(Pens.Black, xRow, y, xRow, y + rowHeight);
-                g.DrawLine(Pens.Black, xName, y, xName, y + rowHeight);
-                g.DrawLine(Pens.Black, xPrice, y, xPrice, y + rowHeight);
-                g.DrawLine(Pens.Black, xQty, y, xQty, y + rowHeight);
+                if (alt) g.FillRectangle(new SolidBrush(Color.FromArgb(240, 240, 240)), tableLeft, y, tableWidth, rowHeight);
 
-                g.DrawString(i.ToString(), normalFont, Brushes.Black, new RectangleF(xRow, y, colRow, rowHeight), centerFormat);
-                g.DrawString(item.Product.Name, normalFont, Brushes.Black, new RectangleF(xName, y, colName, rowHeight), centerFormat);
-                g.DrawString(item.Product.Price.ToString("N0"), normalFont, Brushes.Black, new RectangleF(xPrice, y, colPrice, rowHeight), centerFormat);
-                g.DrawString(item.Quantity.ToString(), normalFont, Brushes.Black, new RectangleF(xQty, y, colQty, rowHeight), centerFormat);
-                g.DrawString(item.TotalPrice.ToString("N0"), normalFont, Brushes.Black, new RectangleF(xTotal, y, colTotal, rowHeight), centerFormat);
+                g.DrawRectangle(new Pen(Color.Black, 0.8f), tableLeft, y, tableWidth, rowHeight);
+
+                g.DrawLine(new Pen(Color.Black, 0.8f), xMablagh, y, xMablagh, y + rowHeight);
+                g.DrawLine(new Pen(Color.Black, 0.8f), xTedad, y, xTedad, y + rowHeight);
+                g.DrawLine(new Pen(Color.Black, 0.8f), xGheymat, y, xGheymat, y + rowHeight);
+                g.DrawLine(new Pen(Color.Black, 0.8f), xName, y, xName, y + rowHeight);
+                g.DrawLine(new Pen(Color.Black, 0.8f), xRadif, y, xRadif, y + rowHeight);
+
+                // مبلغ
+                string totalText = item.TotalPrice.ToString("N0");
+                Font priceFont = tableFont;
+                SizeF sz = g.MeasureString(totalText, tableFont);
+                if (sz.Width > colMablagh - 8)
+                {
+                    float ns = tableFont.Size * ((colMablagh - 8) / sz.Width);
+                    if (ns < 5) ns = 5;
+                    priceFont = new Font(tableFont.FontFamily, ns, tableFont.Style);
+                }
+                g.DrawString(totalText, priceFont, Brushes.Black, new RectangleF(xMablagh + 2, y, colMablagh - 4, rowHeight), rightRTL);
+
+                g.DrawString(item.Quantity.ToString(), tableFont, Brushes.Black, new RectangleF(xTedad + 2, y, colTedad - 4, rowHeight), rightRTL);
+                g.DrawString(item.Product.Price.ToString("N0"), tableFont, Brushes.Black, new RectangleF(xGheymat + 2, y, colGheymat - 4, rowHeight), rightRTL);
+                g.DrawString(item.Product.Name, tableFont, Brushes.Black, new RectangleF(xName + 2, y, colName - 4, rowHeight), centerRTL);
+                g.DrawString(i.ToString(), tableFont, Brushes.Black, new RectangleF(xRadif + 2, y, colRadif - 4, rowHeight), centerRTL);
 
                 y += rowHeight;
                 i++;
+                alt = !alt;
             }
 
-            y += 12;
-            g.DrawString($"جمع کل: {_currentSelectedInvoice.TotalAmount:N0} تومان",
-                titleFont, Brushes.Black, pageWidth / 2, y, center);
+            // ============================================================
+            // سطر آخر - یک سلول کامل (جمع کل)
+            // ============================================================
+            string totalAmount = _currentSelectedInvoice.TotalAmount.ToString("N0");
+            string totalDisplay = $"جمع کل: {totalAmount} تومان";
 
-            y += 20;
-            g.DrawString("با تشکر از خرید شما", normalFont, Brushes.Black, pageWidth / 2, y, center);
+            g.FillRectangle(new SolidBrush(Color.FromArgb(230, 240, 255)), tableLeft, y, tableWidth, rowHeight);
+            g.DrawRectangle(new Pen(Color.Black, 1.5f), tableLeft, y, tableWidth, rowHeight);
+
+            g.DrawString(totalDisplay, totalFont, Brushes.DarkBlue, new RectangleF(tableLeft + 2, y, tableWidth - 4, rowHeight), centerRTL);
+
+            y += rowHeight;
+
+            // ============================================================
+            // ✅ افزایش فاصله بین جدول و فوتر
+            // ============================================================
+            y += 20;  // قبلاً 8 بود، الان 20
+
+            g.DrawString("با تشکر از خرید شما", new Font("Tahoma", 10, FontStyle.Bold), Brushes.Black, pageWidth / 2, y, centerRTL);
+            y += 18;
+
+            g.DrawString("☕ کافه گلستان - بهترین انتخاب شما", footerFont, Brushes.Black, pageWidth / 2, y, centerRTL);
 
             e.HasMorePages = false;
         }
