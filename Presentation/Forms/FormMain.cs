@@ -84,9 +84,6 @@ namespace CafeManager
             }
         }
 
-        // ================================================================
-        // ✅ هدر با دکمه خروج بعد از "کافه گلستان" - بدون نام تکراری
-        // ================================================================
         private void InitializeHeaderPanel()
         {
             headerPanel = new Panel
@@ -97,7 +94,6 @@ namespace CafeManager
                 Padding = new Padding(10, 5, 10, 5)
             };
 
-            // ===== عنوان برنامه =====
             lblAppTitle = new Label
             {
                 Text = "☕ کافه گلستان",
@@ -110,9 +106,6 @@ namespace CafeManager
             };
             headerPanel.Controls.Add(lblAppTitle);
 
-            // ================================================================
-            // ✅ دکمه خروج - بعد از "کافه گلستان"
-            // ================================================================
             btnLogoutHeader = new Button
             {
                 Text = "🚪 خروج",
@@ -147,7 +140,6 @@ namespace CafeManager
             };
             headerPanel.Controls.Add(btnLogoutHeader);
 
-            // ===== پنل اطلاعات کاربر (سمت راست) =====
             var panelUser = new Panel
             {
                 Dock = DockStyle.Right,
@@ -156,7 +148,6 @@ namespace CafeManager
                 BackColor = Color.Transparent
             };
 
-            // ===== ساعت جاری =====
             lblCurrentTime = new Label
             {
                 Location = new Point(5, 12),
@@ -176,7 +167,6 @@ namespace CafeManager
             lblCurrentTime.Text = DateTime.Now.ToString("HH:mm:ss");
             panelUser.Controls.Add(lblCurrentTime);
 
-            // ===== جداکننده =====
             Label lblSeparator = new Label
             {
                 Location = new Point(88, 10),
@@ -186,7 +176,6 @@ namespace CafeManager
             };
             panelUser.Controls.Add(lblSeparator);
 
-            // ===== آواتار =====
             picAvatar = new PictureBox
             {
                 Size = new Size(36, 36),
@@ -196,7 +185,6 @@ namespace CafeManager
             };
             panelUser.Controls.Add(picAvatar);
 
-            // ===== نام کاربر (فقط نام، بدون نقش) =====
             lblUserName = new Label
             {
                 Location = new Point(140, 8),
@@ -207,7 +195,6 @@ namespace CafeManager
             };
             panelUser.Controls.Add(lblUserName);
 
-            // ===== نقش کاربر (با آیکون کوچک) =====
             lblRoleIcon = new Label
             {
                 Location = new Point(300, 8),
@@ -218,7 +205,6 @@ namespace CafeManager
             };
             panelUser.Controls.Add(lblRoleIcon);
 
-            // ===== زمان ورود =====
             lblLoginTime = new Label
             {
                 Location = new Point(350, 12),
@@ -239,10 +225,8 @@ namespace CafeManager
             {
                 var user = CafeManager.CurrentUser;
 
-                // ===== فقط نام کاربر =====
                 lblUserName.Text = user.FullName;
 
-                // ===== نقش کاربر با آیکون (بدون تکرار نام) =====
                 if (user.IsAdmin)
                 {
                     lblRoleIcon.Text = "👑 مدیر سیستم";
@@ -259,10 +243,7 @@ namespace CafeManager
                     lblRoleIcon.ForeColor = Color.FromArgb(200, 180, 150);
                 }
 
-                // ===== زمان ورود =====
                 lblLoginTime.Text = $"⏰ {user.LoginTime:HH:mm}";
-
-                // ===== ساخت آواتار =====
                 CreateAvatar(user.FullName);
             }
             else
@@ -368,9 +349,6 @@ namespace CafeManager
         {
             mainMainMenu = new MenuStrip { BackColor = Color.WhiteSmoke };
 
-            // ============================================================
-            // منوی عملیات سیستم
-            // ============================================================
             menuOperations = new ToolStripMenuItem("⚙️ عملیات سیستم");
 
             var menuInventory = new ToolStripMenuItem("📦 مدیریت انبارداری", null, (s, e) => { new InventoryForm().ShowDialog(); _menuProducts = CafeManager.GetMenu(); LoadMenuToUI(); });
@@ -421,9 +399,6 @@ namespace CafeManager
 
             mainMainMenu.Items.Add(menuOperations);
 
-            // ============================================================
-            // منوی مدیریت پرسنل (با مدیریت کاربران فقط Admin)
-            // ============================================================
             menuPersonnel = new ToolStripMenuItem("👤 مدیریت پرسنل");
 
             var menuEmployee = new ToolStripMenuItem("👤 مدیریت پرسنل", null, (s, e) => {
@@ -441,14 +416,9 @@ namespace CafeManager
             });
             menuPersonnel.DropDownItems.Add(menuPayroll);
 
-            // ===== جداکننده =====
             menuPersonnel.DropDownItems.Add(new ToolStripSeparator());
 
-            // ================================================================
-            // ✅ مدیریت کاربران (فقط Admin)
-            // ================================================================
             var menuUserManagement = new ToolStripMenuItem("👥 مدیریت کاربران", null, (s, e) => {
-                // ===== بررسی دسترسی Admin =====
                 if (!CafeManager.IsAdmin())
                 {
                     MessageBox.Show("⚠️ فقط مدیر سیستم به این بخش دسترسی دارد!",
@@ -467,9 +437,6 @@ namespace CafeManager
 
             mainMainMenu.Items.Add(menuPersonnel);
 
-            // ============================================================
-            // منوی گزارشات
-            // ============================================================
             menuReports = new ToolStripMenuItem("📊 گزارشات");
 
             var menuSalesReport = new ToolStripMenuItem("📈 گزارش فروش (تاریخ شمسی)", null, (s, e) => {
@@ -479,9 +446,6 @@ namespace CafeManager
 
             mainMainMenu.Items.Add(menuReports);
 
-            // ============================================================
-            // منوی متفرقه
-            // ============================================================
             menuMisc = new ToolStripMenuItem("💼 متفرقه");
 
             var menuMiscExpense = new ToolStripMenuItem("💰 هزینه‌های متفرقه", null, (s, e) => {
@@ -507,9 +471,6 @@ namespace CafeManager
 
         private void InitializeMainControls()
         {
-            // ============================================================
-            // ✅ جستجو
-            // ============================================================
             lblSearch = new Label
             {
                 Text = "جستجوی محصول:",
@@ -528,9 +489,6 @@ namespace CafeManager
                 foreach (var p in filtered) lstMenu.Items.Add($"{p.Name} - {p.Price:N0} تومان");
             };
 
-            // ============================================================
-            // ✅ نام مشتری و شماره میز
-            // ============================================================
             lblCustomer = new Label
             {
                 Text = "نام مشتری:",
@@ -559,9 +517,6 @@ namespace CafeManager
                 Font = new Font("Tahoma", 10)
             };
 
-            // ============================================================
-            // ✅ منوی کافه
-            // ============================================================
             int searchWidth = 220;
             int labelWidth = 100;
             int totalWidth = labelWidth + searchWidth + 20;
@@ -646,7 +601,6 @@ namespace CafeManager
             dgvOrder.Columns.Add(editColumn);
             dgvOrder.Columns.Add(deleteColumn);
 
-            // ===== کنترل‌های پایین =====
             lblQty = new Label
             {
                 Text = "تعداد:",
@@ -712,104 +666,115 @@ namespace CafeManager
             });
         }
 
-        // ================================================================
-        // ✅ متد تنظیم موقعیت
-        // ================================================================
         private void FormMain_SizeChanged(object sender, EventArgs e)
         {
-            int w = this.ClientSize.Width;
-            int h = this.ClientSize.Height;
+            if (ClientSize.Width < 900 || ClientSize.Height < 600)
+                return;
 
-            if (w < 100 || h < 100) return;
+            int margin = 20;
+            int gap = 20;
 
-            int headerH = 55;
-            int menuH = mainMainMenu.Height;
+            int top = headerPanel.Height + mainMainMenu.Height + 10;
 
-            int topY = headerH + menuH + 5;
-            int bottomY = h - 10;
+            //----------------------------------------
+            // ردیف اول
+            //----------------------------------------
 
-            int searchWidth = 220;
-            int labelWidth = 100;
-            int totalWidth = labelWidth + searchWidth + 20;
+            lblSearch.Location = new Point(margin, top);
+            txtSearch.Location = new Point(120, top);
+            txtSearch.Size = new Size(220, 28);
 
-            // ============================================================
-            // ردیف ۱: جستجو + نام مشتری + شماره میز
-            // ============================================================
-            int row1Y = topY;
+            lblCustomer.Location = new Point(380, top);
+            txtCustomerName.Location = new Point(465, top);
+            txtCustomerName.Size = new Size(170, 28);
 
-            lblSearch.Location = new Point(20, row1Y);
-            txtSearch.Location = new Point(labelWidth + 20, row1Y - 2);
-            txtSearch.Width = searchWidth;
+            lblTable.Location = new Point(655, top);
+            txtTableNumber.Location = new Point(735, top);
+            txtTableNumber.Size = new Size(90, 28);
 
-            int centerX = w / 2;
-            int customerX = centerX - 210;
-            lblCustomer.Location = new Point(customerX, row1Y);
-            txtCustomerName.Location = new Point(customerX + 85, row1Y - 2);
-            txtCustomerName.Width = 170;
+            //----------------------------------------
+            // عنوان ها
+            //----------------------------------------
 
-            int tableX = customerX + 85 + 170 + 15;
-            lblTable.Location = new Point(tableX, row1Y);
-            txtTableNumber.Location = new Point(tableX + 85, row1Y - 2);
-            txtTableNumber.Width = 100;
+            int titleY = top + 40;
 
-            // ============================================================
-            // ردیف ۲: عنوان منو و فاکتور
-            // ============================================================
-            int row2Y = row1Y + 35;
+            lblMenuTitle.Location = new Point(margin, titleY);
 
-            lblMenuTitle.Location = new Point(20, row2Y);
-            lblMenuTitle.Width = totalWidth;
+            int menuWidth = 340;
 
-            int orderTitleX = totalWidth + 40;
-            if (orderTitleX < 300) orderTitleX = 300;
-            lblOrderTitle.Location = new Point(orderTitleX, row2Y);
+            int gridX = margin + menuWidth + gap;
 
-            // ============================================================
-            // ردیف ۳: لیست و دیتاگرید
-            // ============================================================
-            int row3Y = row2Y + 30;
-            int remainingH = bottomY - row3Y - 75;
+            lblOrderTitle.Location = new Point(gridX, titleY);
 
-            int gridH = remainingH;
-            if (gridH < 80) gridH = 80;
-            if (gridH > 400) gridH = 400;
+            //----------------------------------------
+            // محاسبه ارتفاع مشترک
+            //----------------------------------------
+            //----------------------------------------
+            // محاسبه ارتفاع مشترک ListBox و DataGridView
+            //----------------------------------------
 
-            lstMenu.Location = new Point(20, row3Y);
-            lstMenu.Width = totalWidth;
-            lstMenu.Height = gridH;
+            int bodyTop = titleY + 30;
 
-            int dgvX = totalWidth + 30;
-            int dgvW = w - dgvX - 20;
-            if (dgvW < 200) dgvW = 200;
+            // اگر ارتفاع دکمه هنوز مقدار نگرفته بود
+            int buttonHeight = btnAdd.Height > 0 ? btnAdd.Height : 40;
 
-            dgvOrder.Location = new Point(dgvX, row3Y);
-            dgvOrder.Size = new Size(dgvW, gridH);
+            // فاصله پایین فرم
+            int bottomMargin = 15;
 
-            // ============================================================
-            // ردیف ۴: کنترل‌های پایین
-            // ============================================================
-            int row4Y = row3Y + gridH + 8;
+            // ارتفاع مورد نیاز پایین فرم (دکمه + فاصله)
+            int buttonArea = buttonHeight + bottomMargin;
 
-            lblQty.Location = new Point(20, row4Y);
-            numQuantity.Location = new Point(80, row4Y - 2);
-            numQuantity.Width = 70;
+            // ارتفاع مشترک لیست و گرید
+            int bodyHeight = ClientSize.Height - bodyTop - buttonArea;
 
-            int btnY = row4Y + 28;
-            btnAdd.Location = new Point(20, btnY);
-            btnAdd.Width = totalWidth;
-            btnAdd.Height = 35;
+            if (bodyHeight < 250)
+                bodyHeight = 250;
 
-            lblTotal.Location = new Point(dgvX, row4Y);
-            lblTotal.Width = 350;
+            //----------------------------------------
+            // ListBox
+            //----------------------------------------
 
-            int btnY2 = row4Y + 28;
-            btnCheckout.Location = new Point(dgvX, btnY2);
-            btnCheckout.Width = 170;
-            btnCheckout.Height = 35;
+            lstMenu.Location = new Point(margin, bodyTop);
+            lstMenu.Size = new Size(menuWidth, bodyHeight);
 
-            btnInvoiceManager.Location = new Point(dgvX + 180, btnY2);
-            btnInvoiceManager.Width = 170;
-            btnInvoiceManager.Height = 35;
+            //----------------------------------------
+            // DataGridView
+            //----------------------------------------
+
+            int gridWidth = ClientSize.Width - gridX - margin;
+
+            dgvOrder.Location = new Point(gridX, bodyTop);
+            dgvOrder.Size = new Size(gridWidth, bodyHeight);
+
+            //----------------------------------------
+            // تعداد
+            //----------------------------------------
+
+            int bottomY = bodyTop + bodyHeight + 10;
+
+            lblQty.Location = new Point(margin, bottomY + 6);
+
+            numQuantity.Location = new Point(75, bottomY + 2);
+            numQuantity.Size = new Size(70, 28);
+
+            //----------------------------------------
+            // سه دکمه + جمع کل در یک ردیف
+            //----------------------------------------
+
+            btnAdd.Size = new Size(180, 40);
+            btnCheckout.Size = new Size(180, 40);
+            btnInvoiceManager.Size = new Size(180, 40);
+
+            btnAdd.Location = new Point(170, bottomY);
+
+            btnCheckout.Location = new Point(370, bottomY);
+
+            btnInvoiceManager.Location = new Point(570, bottomY);
+
+            // جمع کل کنار دکمه مدیریت
+            lblTotal.Location = new Point(770, bottomY + 8);
+            lblTotal.Size = new Size(ClientSize.Width - 780, 25);
+            lblTotal.TextAlign = ContentAlignment.MiddleLeft;
         }
 
         private void LoadMenuToUI()

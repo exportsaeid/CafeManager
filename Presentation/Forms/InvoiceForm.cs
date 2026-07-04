@@ -561,10 +561,21 @@ namespace CafeManager
 
         private void DgvInvoiceItems_SelectionChanged(object sender, EventArgs e)
         {
-            if (_dgvInvoiceItems.SelectedRows.Count > 0 && _dgvInvoiceItems.SelectedRows[0].Cells["Qty"].Value != null)
-            {
-                _numItemQty.Value = Convert.ToInt32(_dgvInvoiceItems.SelectedRows[0].Cells["Qty"].Value);
-            }
+            if (_dgvInvoiceItems.SelectedRows.Count == 0)
+                return;
+
+            if (!int.TryParse(
+                _dgvInvoiceItems.SelectedRows[0].Cells["Qty"].Value?.ToString(),
+                out int qty))
+                return;
+
+            if (qty < _numItemQty.Minimum)
+                qty = (int)_numItemQty.Minimum;
+
+            if (qty > _numItemQty.Maximum)
+                qty = (int)_numItemQty.Maximum;
+
+            _numItemQty.Value = qty;
         }
 
         private void DgvInvoices_CellValueChanged(object sender, DataGridViewCellEventArgs e)
