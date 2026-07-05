@@ -921,6 +921,13 @@ namespace CafeManager
                 FormatFlags = StringFormatFlags.DirectionRightToLeft
             };
 
+            StringFormat leftRTL = new StringFormat
+            {
+                Alignment = StringAlignment.Near,
+                LineAlignment = StringAlignment.Center,
+                FormatFlags = StringFormatFlags.DirectionRightToLeft
+            };
+
             // ============================================================
             // هدر
             // ============================================================
@@ -1036,10 +1043,21 @@ namespace CafeManager
                 }
                 g.DrawString(totalText, priceFont, Brushes.Black, new RectangleF(xMablagh + 2, y, colMablagh - 4, rowHeight), rightRTL);
 
-                g.DrawString(item.Quantity.ToString(), tableFont, Brushes.Black, new RectangleF(xTedad + 2, y, colTedad - 4, rowHeight), rightRTL);
-                g.DrawString(item.Product.Price.ToString("N0"), tableFont, Brushes.Black, new RectangleF(xGheymat + 2, y, colGheymat - 4, rowHeight), rightRTL);
-                g.DrawString(item.Product.Name, tableFont, Brushes.Black, new RectangleF(xName + 2, y, colName - 4, rowHeight), centerRTL);
-                g.DrawString(i.ToString(), tableFont, Brushes.Black, new RectangleF(xRadif + 2, y, colRadif - 4, rowHeight), centerRTL);
+                // ===== تعداد - وسط‌چین =====
+                g.DrawString(item.Quantity.ToString(), tableFont, Brushes.Black,
+                    new RectangleF(xTedad + 2, y, colTedad - 4, rowHeight), centerRTL);  // ✅ اصلاح شده
+
+                // قیمت - راست‌چین
+                g.DrawString(item.Product.Price.ToString("N0"), tableFont, Brushes.Black,
+                    new RectangleF(xGheymat + 2, y, colGheymat - 4, rowHeight), rightRTL);
+
+                // نام کالا - وسط‌چین
+                g.DrawString(item.Product.Name, tableFont, Brushes.Black,
+                    new RectangleF(xName + 2, y, colName - 4, rowHeight), centerRTL);
+
+                // ردیف - وسط‌چین
+                g.DrawString(i.ToString(), tableFont, Brushes.Black,
+                    new RectangleF(xRadif + 2, y, colRadif - 4, rowHeight), centerRTL);
 
                 y += rowHeight;
                 i++;
@@ -1060,9 +1078,9 @@ namespace CafeManager
             y += rowHeight;
 
             // ============================================================
-            // ✅ افزایش فاصله بین جدول و فوتر
+            // فوتر
             // ============================================================
-            y += 20;  // قبلاً 8 بود، الان 20
+            y += 20;
 
             g.DrawString("با تشکر از خرید شما", new Font("Tahoma", 10, FontStyle.Bold), Brushes.Black, pageWidth / 2, y, centerRTL);
             y += 18;
