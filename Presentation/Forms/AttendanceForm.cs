@@ -40,7 +40,7 @@ namespace CafeManager
         public AttendanceForm()
         {
             this.Text = "📋 ثبت حضور و غیاب پرسنل";
-            this.ShowInTaskbar = false; // ← این خط را اضافه کنید
+            this.ShowInTaskbar = false;
             this.WindowState = FormWindowState.Maximized;
             this.MinimumSize = new Size(900, 650);
             this.StartPosition = FormStartPosition.CenterParent;
@@ -206,8 +206,8 @@ namespace CafeManager
             this.Controls.Add(dgvAttendances);
             y += dgvAttendances.Height + 10;
 
-            // ========== پنل ورودی ==========
-            GroupBox grpInput = new GroupBox
+            // ========== پنل اطلاعات (مشابه فرم پرسنل) ==========
+            GroupBox grpInfo = new GroupBox
             {
                 Text = "📝 ثبت حضور و غیاب",
                 Location = new Point(margin, y),
@@ -215,20 +215,20 @@ namespace CafeManager
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            TableLayoutPanel tlpInput = new TableLayoutPanel
+            TableLayoutPanel tlpInfo = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 4,
                 RowCount = 2,
                 Padding = new Padding(10)
             };
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
+            tlpInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
+            tlpInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
+            tlpInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
+            tlpInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-            // سطر اول
-            tlpInput.Controls.Add(new Label { Text = "پرسنل:", TextAlign = ContentAlignment.MiddleRight }, 0, 0);
+            // سطر اول: پرسنل و تاریخ
+            tlpInfo.Controls.Add(new Label { Text = "پرسنل:", TextAlign = ContentAlignment.MiddleRight }, 0, 0);
             cmbEmployee = new ComboBox
             {
                 Dock = DockStyle.Fill,
@@ -237,9 +237,9 @@ namespace CafeManager
                 DisplayMember = "FullName",
                 ValueMember = "Id"
             };
-            tlpInput.Controls.Add(cmbEmployee, 1, 0);
+            tlpInfo.Controls.Add(cmbEmployee, 1, 0);
 
-            tlpInput.Controls.Add(new Label { Text = "تاریخ:", TextAlign = ContentAlignment.MiddleRight }, 2, 0);
+            tlpInfo.Controls.Add(new Label { Text = "تاریخ:", TextAlign = ContentAlignment.MiddleRight }, 2, 0);
 
             // ========== پنل تاریخ شمسی ==========
             Panel datePanel = new Panel { Dock = DockStyle.Fill, Height = 30 };
@@ -266,10 +266,10 @@ namespace CafeManager
             datePanel.Controls.Add(btnDate);
             lblDate.Dock = DockStyle.Fill;
             btnDate.BringToFront();
-            tlpInput.Controls.Add(datePanel, 3, 0);
+            tlpInfo.Controls.Add(datePanel, 3, 0);
 
-            // سطر دوم
-            tlpInput.Controls.Add(new Label { Text = "ورود:", TextAlign = ContentAlignment.MiddleRight }, 0, 1);
+            // سطر دوم: ورود و خروج
+            tlpInfo.Controls.Add(new Label { Text = "ورود:", TextAlign = ContentAlignment.MiddleRight }, 0, 1);
             dtpCheckIn = new DateTimePicker
             {
                 Dock = DockStyle.Fill,
@@ -280,9 +280,9 @@ namespace CafeManager
                 Font = new Font("Tahoma", 10),
                 Value = DateTime.Now.Date.AddHours(8)
             };
-            tlpInput.Controls.Add(dtpCheckIn, 1, 1);
+            tlpInfo.Controls.Add(dtpCheckIn, 1, 1);
 
-            tlpInput.Controls.Add(new Label { Text = "خروج:", TextAlign = ContentAlignment.MiddleRight }, 2, 1);
+            tlpInfo.Controls.Add(new Label { Text = "خروج:", TextAlign = ContentAlignment.MiddleRight }, 2, 1);
             dtpCheckOut = new DateTimePicker
             {
                 Dock = DockStyle.Fill,
@@ -293,41 +293,50 @@ namespace CafeManager
                 Font = new Font("Tahoma", 10),
                 Value = DateTime.Now.Date.AddHours(16)
             };
-            tlpInput.Controls.Add(dtpCheckOut, 3, 1);
+            tlpInfo.Controls.Add(dtpCheckOut, 3, 1);
 
-            grpInput.Controls.Add(tlpInput);
-            this.Controls.Add(grpInput);
-            y += grpInput.Height + 10;
+            grpInfo.Controls.Add(tlpInfo);
+            this.Controls.Add(grpInfo);
+            y += grpInfo.Height + 10;
 
-            // ========== پنل پایین ==========
+            // ========== پنل وضعیت و یادداشت (مشابه فرم پرسنل) ==========
             Panel pnlBottom = new Panel
             {
                 Location = new Point(margin, y),
-                Size = new Size(this.ClientSize.Width - margin * 2, 60),
+                Size = new Size(this.ClientSize.Width - margin * 2, 110),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
             chkIsPresent = new CheckBox
             {
-                Text = "حاضر",
+                Text = "✅ حاضر",
                 Location = new Point(0, 10),
-                Size = new Size(80, 30),
+                Size = new Size(100, 30),
                 Font = new Font("Tahoma", 10, FontStyle.Bold),
-                Checked = true
+                Checked = true,
+                Appearance = Appearance.Button,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.LightGreen,
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            chkIsPresent.CheckedChanged += (s, e) =>
+            {
+                chkIsPresent.BackColor = chkIsPresent.Checked ? Color.LightGreen : Color.LightCoral;
+                chkIsPresent.Text = chkIsPresent.Checked ? "✅ حاضر" : "❌ غایب";
             };
 
             Label lblNotes = new Label
             {
                 Text = "یادداشت:",
-                Location = new Point(100, 12),
+                Location = new Point(120, 12),
                 Size = new Size(70, 25),
                 TextAlign = ContentAlignment.MiddleRight
             };
 
             txtNotes = new TextBox
             {
-                Location = new Point(200, 10),
-                Size = new Size(pnlBottom.Width - 550, 30),
+                Location = new Point(200, 8),
+                Size = new Size(pnlBottom.Width - 600, 30),
                 Font = new Font("Tahoma", 10),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
@@ -335,7 +344,7 @@ namespace CafeManager
             btnAdd = new Button
             {
                 Text = "➕ افزودن",
-                Location = new Point(pnlBottom.Width - 350, 8),
+                Location = new Point(pnlBottom.Width - 350, 5),
                 Size = new Size(110, 35),
                 BackColor = Color.LightGreen,
                 Font = new Font("Tahoma", 9, FontStyle.Bold),
@@ -347,7 +356,7 @@ namespace CafeManager
             btnUpdate = new Button
             {
                 Text = "💾 ویرایش",
-                Location = new Point(pnlBottom.Width - 230, 8),
+                Location = new Point(pnlBottom.Width - 230, 5),
                 Size = new Size(110, 35),
                 BackColor = Color.LightBlue,
                 Font = new Font("Tahoma", 9, FontStyle.Bold),
@@ -359,7 +368,7 @@ namespace CafeManager
             btnDelete = new Button
             {
                 Text = "🗑️ حذف",
-                Location = new Point(pnlBottom.Width - 110, 8),
+                Location = new Point(pnlBottom.Width - 110, 5),
                 Size = new Size(100, 35),
                 BackColor = Color.LightCoral,
                 Font = new Font("Tahoma", 9, FontStyle.Bold),
@@ -383,15 +392,15 @@ namespace CafeManager
                 int w = this.ClientSize.Width - margin * 2;
                 grpFilter.Width = w;
                 dgvAttendances.Width = w;
-                grpInput.Width = w;
+                grpInfo.Width = w;
                 pnlBottom.Width = w;
 
-                txtNotes.Location = new Point(200, 10);
+                txtNotes.Location = new Point(200, 8);
                 txtNotes.Width = w - 550;
 
-                btnAdd.Location = new Point(pnlBottom.Width - 350, 8);
-                btnUpdate.Location = new Point(pnlBottom.Width - 230, 8);
-                btnDelete.Location = new Point(pnlBottom.Width - 110, 8);
+                btnAdd.Location = new Point(pnlBottom.Width - 350, 5);
+                btnUpdate.Location = new Point(pnlBottom.Width - 230, 5);
+                btnDelete.Location = new Point(pnlBottom.Width - 110, 5);
 
                 // به‌روزرسانی موقعیت دکمه‌های تاریخ در پنل فیلتر
                 btnFromDate.Location = new Point(grpFilter.Width - 360, 23);
@@ -478,7 +487,7 @@ namespace CafeManager
                 dgvAttendances.Rows.Add(
                     a.Id,
                     ((Employee)cmbEmployee.SelectedItem).FullName,
-                    ConvertToPersianDate(a.Date), // تاریخ شمسی
+                    ConvertToPersianDate(a.Date),
                     a.CheckIn.ToString(@"hh\:mm"),
                     a.CheckOut.ToString(@"hh\:mm"),
                     a.WorkHours.ToString(@"hh\:mm"),
@@ -489,6 +498,7 @@ namespace CafeManager
                     dgvAttendances.Rows[dgvAttendances.Rows.Count - 1].DefaultCellStyle.BackColor = Color.LightYellow;
             }
 
+            // ========== پاک‌سازی انتخاب (مشابه فرم پرسنل) ==========
             this.BeginInvoke(new Action(() =>
             {
                 dgvAttendances.ClearSelection();
@@ -532,6 +542,7 @@ namespace CafeManager
 
         private void ClearFields()
         {
+            // ========== تنظیم تاریخ پیش‌فرض (مشابه فرم پرسنل) ==========
             selectedDate = DateTime.Now.Date;
             dtpCheckIn.Value = DateTime.Now.Date.AddHours(8);
             dtpCheckOut.Value = DateTime.Now.Date.AddHours(16);
@@ -542,6 +553,7 @@ namespace CafeManager
             if (!_loading)
             {
                 dgvAttendances.ClearSelection();
+                dgvAttendances.CurrentCell = null;
             }
         }
 
@@ -550,7 +562,7 @@ namespace CafeManager
             return new Attendance
             {
                 EmployeeId = ((Employee)cmbEmployee.SelectedItem).Id,
-                Date = selectedDate, // استفاده از تاریخ شمسی انتخاب شده
+                Date = selectedDate,
                 CheckIn = dtpCheckIn.Value.TimeOfDay,
                 CheckOut = dtpCheckOut.Value.TimeOfDay,
                 IsPresent = chkIsPresent.Checked,
@@ -570,6 +582,27 @@ namespace CafeManager
             {
                 MessageBox.Show("ساعت خروج باید بعد از ساعت ورود باشد.", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
+            }
+
+            // ========== بررسی عدم ثبت تکراری (مشابه فرم پرسنل) ==========
+            int employeeId = ((Employee)cmbEmployee.SelectedItem).Id;
+            var existing = CafeManager.GetAttendances(employeeId, selectedDate, selectedDate.AddDays(1).AddSeconds(-1));
+
+            // اگر در حال ویرایش هستیم، رکورد جاری را از بررسی حذف می‌کنیم
+            int currentId = 0;
+            if (dgvAttendances.SelectedRows.Count > 0)
+            {
+                currentId = Convert.ToInt32(dgvAttendances.SelectedRows[0].Cells["Id"].Value);
+            }
+
+            foreach (var a in existing)
+            {
+                if (a.Id != currentId)
+                {
+                    MessageBox.Show($"برای این پرسنل در تاریخ {ConvertToPersianDate(selectedDate)} قبلاً ثبت شده است.",
+                        "خطا", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
             }
 
             return true;
@@ -627,8 +660,11 @@ namespace CafeManager
                 return;
             }
 
+            int id = Convert.ToInt32(dgvAttendances.SelectedRows[0].Cells["Id"].Value);
+            var attendance = CafeManager.GetAttendanceById(id);
+
             DialogResult result = MessageBox.Show(
-                "آیا از حذف این رکورد حضور و غیاب اطمینان دارید؟",
+                $"آیا از حذف رکورد حضور و غیاب برای تاریخ {ConvertToPersianDate(attendance?.Date ?? DateTime.Now)} اطمینان دارید؟",
                 "تأیید حذف",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning
@@ -638,7 +674,6 @@ namespace CafeManager
             {
                 try
                 {
-                    int id = Convert.ToInt32(dgvAttendances.SelectedRows[0].Cells["Id"].Value);
                     CafeManager.DeleteAttendance(id);
                     LoadAttendances(fromDateTime, toDateTime);
                     ClearFields();
