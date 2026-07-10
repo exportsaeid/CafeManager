@@ -6,6 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>CafeManager</RootNamespace>
     <StartupObject></StartupObject>
+    <ApplicationIcon>icons8-coffee-cup-48.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
