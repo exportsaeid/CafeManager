@@ -123,13 +123,16 @@ namespace CafeManager
 
             ToolTip tip = new ToolTip();
             tip.SetToolTip(btnLogoutHeader, "خروج از حساب کاربری");
-
             btnLogoutHeader.Click += (s, e) =>
             {
-                var result = MessageBox.Show("آیا از خروج از حساب کاربری مطمئن هستید؟",
+                // ===== پیام‌باکس فارسی با دکمه‌های بله/خیر =====
+                DialogResult result = MessageBox.Show(
+                    "آیا از خروج از حساب کاربری مطمئن هستید؟",
                     "خروج از حساب",
                     MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2  // دکمه "خیر" به عنوان پیش‌فرض
+                );
 
                 if (result == DialogResult.Yes)
                 {
@@ -138,6 +141,22 @@ namespace CafeManager
                     this.Close();
                 }
             };
+
+            //btnLogoutHeader.Click += (s, e) =>
+            //{
+            //    var result = MessageBox.Show("آیا از خروج از حساب کاربری مطمئن هستید؟",
+            //        "خروج از حساب",
+            //        MessageBoxButtons.YesNo,
+            //        MessageBoxIcon.Question);
+
+            //    if (result == DialogResult.Yes)
+            //    {
+            //        CafeManager.Logout();
+            //        this.DialogResult = DialogResult.OK;
+            //        this.Close();
+            //    }
+            ////};
+            ///
             headerPanel.Controls.Add(btnLogoutHeader);
 
             var panelUser = new Panel
@@ -436,16 +455,6 @@ namespace CafeManager
             menuPersonnel.DropDownItems.Add(menuUserManagement);
 
             mainMainMenu.Items.Add(menuPersonnel);
-
-            menuReports = new ToolStripMenuItem("📊 گزارشات");
-
-            var menuSalesReport = new ToolStripMenuItem("📈 گزارش فروش (تاریخ شمسی)", null, (s, e) => {
-                using (var frm = new ReportForm()) { frm.ShowDialog(this); }
-            });
-            menuReports.DropDownItems.Add(menuSalesReport);
-
-            mainMainMenu.Items.Add(menuReports);
-
             menuMisc = new ToolStripMenuItem("💼 متفرقه");
 
             var menuMiscExpense = new ToolStripMenuItem("💰 هزینه‌های متفرقه", null, (s, e) => {
@@ -464,6 +473,17 @@ namespace CafeManager
             menuMisc.DropDownItems.Add(menuProfitReport);
 
             mainMainMenu.Items.Add(menuMisc);
+
+            menuReports = new ToolStripMenuItem("📊 گزارشات");
+
+            var menuSalesReport = new ToolStripMenuItem("📈 گزارش فروش (تاریخ شمسی)", null, (s, e) => {
+                using (var frm = new ReportForm()) { frm.ShowDialog(this); }
+            });
+            menuReports.DropDownItems.Add(menuSalesReport);
+
+            mainMainMenu.Items.Add(menuReports);
+
+          
 
             this.MainMenuStrip = mainMainMenu;
             this.Controls.Add(mainMainMenu);

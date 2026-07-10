@@ -32,7 +32,7 @@ namespace CafeManager
             this.Text = "سیستم گزارش‌گیری پیشرفته کافه (تقویم فارسی)";
             this.ShowInTaskbar = false;
             this.WindowState = FormWindowState.Maximized;
-      
+
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.WhiteSmoke;
 
@@ -197,10 +197,14 @@ namespace CafeManager
                 RowHeadersVisible = false,
                 GridColor = Color.Gainsboro
             };
+
+            // ===== اضافه کردن ستون تاریخ =====
             dgvInvoices.Columns.Add("Id", "شماره فاکتور");
+            dgvInvoices.Columns.Add("Date", "تاریخ فاکتور");        // ← ستون جدید
             dgvInvoices.Columns.Add("Name", "نام مشتری");
             dgvInvoices.Columns.Add("Table", "شماره میز");
             dgvInvoices.Columns.Add("Total", "مبلغ کل (تومان)");
+
             dgvInvoices.SelectionChanged += dgvInvoices_SelectionChanged;
             mainLayout.Controls.Add(dgvInvoices, 0, 2);
 
@@ -336,7 +340,15 @@ namespace CafeManager
 
             foreach (var inv in history)
             {
-                dgvInvoices.Rows.Add(inv.Id, inv.CustomerName, inv.TableNumber, inv.TotalAmount.ToString("N0"));
+                // ===== اضافه کردن تاریخ به ردیف =====
+                dgvInvoices.Rows.Add(
+                    inv.Id,
+                    ConvertToPersianDateTime(inv.OrderDate),  // ← تاریخ
+                    inv.CustomerName,
+                    inv.TableNumber,
+                    inv.TotalAmount.ToString("N0")
+                );
+
                 totalSalesInPeriod += inv.TotalAmount;
 
                 if (inv.IsSettled)
@@ -424,6 +436,4 @@ namespace CafeManager
             }
         }
     }
-
-    
 }

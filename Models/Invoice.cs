@@ -5,12 +5,12 @@ using System.Linq;
 namespace CafeManager.Models
 {
     // ========== کلاس Payment برای پرداخت ترکیبی ==========
-    public class Payment
-    {
-        public string Method { get; set; } // نقدی, کارتخوان, انتقال, آنلاین
-        public double Amount { get; set; }
-        public DateTime PaymentDate { get; set; } = DateTime.Now;
-    }
+    //public class Payment
+    //{
+    //    public string Method { get; set; } // نقدی, کارتخوان, انتقال, آنلاین
+    //    public double Amount { get; set; }
+    //    public DateTime PaymentDate { get; set; } = DateTime.Now;
+    //}
     // =====================================================
 
     public class Invoice

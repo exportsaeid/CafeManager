@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Reflection;
 using System.Windows.Forms;
 using CafeManager;
 
@@ -14,12 +15,13 @@ namespace CafeManager
         private PictureBox picLogo;
         private Label lblTitle;
         private Label lblSubTitle;
+        private Label lblVersion;   // ← اضافه شد
 
         public LoginForm()
         {
             // تنظیمات فرم
             this.Text = "ورود به صندوق کافه";
-            this.Size = new Size(420, 500);
+            this.Size = new Size(420, 530);  // ← افزایش ارتفاع برای نمایش نسخه
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -76,11 +78,24 @@ namespace CafeManager
                 BackColor = Color.Transparent
             };
 
+            // ===== نمایش نسخه و سال =====
+            string version = GetVersion();
+            lblVersion = new Label
+            {
+                Text = $"نسخه {version} | © {DateTime.Now.Year} کافه گلستان",
+                Location = new Point(20, 258),
+                Size = new Size(370, 20),
+                Font = new Font("Tahoma", 8, FontStyle.Italic),
+                ForeColor = Color.FromArgb(150, 120, 100),
+                TextAlign = ContentAlignment.MiddleCenter,
+                BackColor = Color.Transparent
+            };
+
             // ===== نام کاربری =====
             Label lblUser = new Label
             {
                 Text = "👤 نام کاربری:",
-                Location = new Point(260, 280),
+                Location = new Point(260, 295),
                 Size = new Size(120, 25),
                 ForeColor = Color.FromArgb(60, 40, 20),
                 Font = new Font("Tahoma", 10, FontStyle.Bold)
@@ -88,7 +103,7 @@ namespace CafeManager
 
             txtUser = new TextBox
             {
-                Location = new Point(40, 277),
+                Location = new Point(40, 292),
                 Size = new Size(210, 30),
                 Font = new Font("Tahoma", 11),
                 BackColor = Color.FromArgb(250, 245, 240),
@@ -101,7 +116,7 @@ namespace CafeManager
             Label lblPass = new Label
             {
                 Text = "🔒 کلمه عبور:",
-                Location = new Point(260, 325),
+                Location = new Point(260, 340),
                 Size = new Size(120, 25),
                 ForeColor = Color.FromArgb(60, 40, 20),
                 Font = new Font("Tahoma", 10, FontStyle.Bold)
@@ -109,7 +124,7 @@ namespace CafeManager
 
             txtPass = new TextBox
             {
-                Location = new Point(40, 322),
+                Location = new Point(40, 337),
                 Size = new Size(210, 30),
                 Font = new Font("Tahoma", 11),
                 BackColor = Color.FromArgb(250, 245, 240),
@@ -123,7 +138,7 @@ namespace CafeManager
             btnLogin = new Button
             {
                 Text = "🚀 ورود به برنامه",
-                Location = new Point(40, 375),
+                Location = new Point(40, 390),
                 Size = new Size(330, 45),
                 Font = new Font("Tahoma", 11, FontStyle.Bold),
                 BackColor = Color.FromArgb(139, 69, 19),
@@ -145,7 +160,7 @@ namespace CafeManager
             // ===== اضافه کردن کنترل‌ها =====
             this.Controls.AddRange(new Control[]
             {
-                picLogo, lblTitle, lblSubTitle,
+                picLogo, lblTitle, lblSubTitle, lblVersion,
                 lblUser, txtUser, lblPass, txtPass, btnLogin
             });
 
@@ -166,7 +181,27 @@ namespace CafeManager
 
             using (Pen pen = new Pen(Color.FromArgb(180, 120, 70), 2))
             {
-                e.Graphics.DrawLine(pen, 50, 265, 350, 265);
+                e.Graphics.DrawLine(pen, 50, 280, 350, 280);
+            }
+        }
+
+        // ================================================================
+        // ✅ دریافت شماره نسخه از Assembly
+        // ================================================================
+        private string GetVersion()
+        {
+            try
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                if (version != null)
+                {
+                    return $"{version.Major}.{version.Minor}.{version.Build}";
+                }
+                return "1.0.0";
+            }
+            catch
+            {
+                return "1.0.0";
             }
         }
 
@@ -223,8 +258,6 @@ namespace CafeManager
         {
             if (CafeManager.Login(txtUser.Text, txtPass.Text))
             {
-                // ===== بدون دیالوگ خوش‌آمدگویی =====
-                // فقط فرم را ببندید و به فرم اصلی بروید
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
