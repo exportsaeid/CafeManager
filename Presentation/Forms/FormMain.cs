@@ -106,11 +106,12 @@ namespace CafeManager
             };
             headerPanel.Controls.Add(lblAppTitle);
 
+            // دکمه خروج - ویژگی Anchor حذف شد تا زمان Maximize مشکل پرش نداشته باشد
             btnLogoutHeader = new Button
             {
                 Text = "🚪 خروج",
                 Location = new Point(215, 10),
-                Size = new Size(55, 32),
+                Size = new Size(65, 32),
                 BackColor = Color.FromArgb(220, 50, 50),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -125,13 +126,12 @@ namespace CafeManager
             tip.SetToolTip(btnLogoutHeader, "خروج از حساب کاربری");
             btnLogoutHeader.Click += (s, e) =>
             {
-                // ===== پیام‌باکس فارسی با دکمه‌های بله/خیر =====
                 DialogResult result = MessageBox.Show(
                     "آیا از خروج از حساب کاربری مطمئن هستید؟",
                     "خروج از حساب",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2  // دکمه "خیر" به عنوان پیش‌فرض
+                    MessageBoxDefaultButton.Button2
                 );
 
                 if (result == DialogResult.Yes)
@@ -141,22 +141,6 @@ namespace CafeManager
                     this.Close();
                 }
             };
-
-            //btnLogoutHeader.Click += (s, e) =>
-            //{
-            //    var result = MessageBox.Show("آیا از خروج از حساب کاربری مطمئن هستید؟",
-            //        "خروج از حساب",
-            //        MessageBoxButtons.YesNo,
-            //        MessageBoxIcon.Question);
-
-            //    if (result == DialogResult.Yes)
-            //    {
-            //        CafeManager.Logout();
-            //        this.DialogResult = DialogResult.OK;
-            //        this.Close();
-            //    }
-            ////};
-            ///
             headerPanel.Controls.Add(btnLogoutHeader);
 
             var panelUser = new Panel
@@ -236,6 +220,9 @@ namespace CafeManager
 
             headerPanel.Controls.Add(panelUser);
             this.Controls.Add(headerPanel);
+
+            // اطمینان از اینکه دکمه خروج روی بقیه کنترل‌ها قرار می‌گیرد
+            btnLogoutHeader.BringToFront();
         }
 
         private void UpdateHeaderPanel()
@@ -243,7 +230,6 @@ namespace CafeManager
             if (CafeManager.IsAuthenticated())
             {
                 var user = CafeManager.CurrentUser;
-
                 lblUserName.Text = user.FullName;
 
                 if (user.IsAdmin)
@@ -455,6 +441,7 @@ namespace CafeManager
             menuPersonnel.DropDownItems.Add(menuUserManagement);
 
             mainMainMenu.Items.Add(menuPersonnel);
+
             menuMisc = new ToolStripMenuItem("💼 متفرقه");
 
             var menuMiscExpense = new ToolStripMenuItem("💰 هزینه‌های متفرقه", null, (s, e) => {
@@ -482,8 +469,6 @@ namespace CafeManager
             menuReports.DropDownItems.Add(menuSalesReport);
 
             mainMainMenu.Items.Add(menuReports);
-
-          
 
             this.MainMenuStrip = mainMainMenu;
             this.Controls.Add(mainMainMenu);
@@ -699,7 +684,6 @@ namespace CafeManager
             //----------------------------------------
             // ردیف اول
             //----------------------------------------
-
             lblSearch.Location = new Point(margin, top);
             txtSearch.Location = new Point(120, top);
             txtSearch.Size = new Size(220, 28);
@@ -715,36 +699,23 @@ namespace CafeManager
             //----------------------------------------
             // عنوان ها
             //----------------------------------------
-
             int titleY = top + 40;
-
             lblMenuTitle.Location = new Point(margin, titleY);
 
             int menuWidth = 340;
-
             int gridX = margin + menuWidth + gap;
 
             lblOrderTitle.Location = new Point(gridX, titleY);
 
             //----------------------------------------
-            // محاسبه ارتفاع مشترک
-            //----------------------------------------
-            //----------------------------------------
             // محاسبه ارتفاع مشترک ListBox و DataGridView
             //----------------------------------------
-
             int bodyTop = titleY + 30;
 
-            // اگر ارتفاع دکمه هنوز مقدار نگرفته بود
             int buttonHeight = btnAdd.Height > 0 ? btnAdd.Height : 40;
-
-            // فاصله پایین فرم
             int bottomMargin = 15;
-
-            // ارتفاع مورد نیاز پایین فرم (دکمه + فاصله)
             int buttonArea = buttonHeight + bottomMargin;
 
-            // ارتفاع مشترک لیست و گرید
             int bodyHeight = ClientSize.Height - bodyTop - buttonArea;
 
             if (bodyHeight < 250)
@@ -753,23 +724,19 @@ namespace CafeManager
             //----------------------------------------
             // ListBox
             //----------------------------------------
-
             lstMenu.Location = new Point(margin, bodyTop);
             lstMenu.Size = new Size(menuWidth, bodyHeight);
 
             //----------------------------------------
             // DataGridView
             //----------------------------------------
-
             int gridWidth = ClientSize.Width - gridX - margin;
-
             dgvOrder.Location = new Point(gridX, bodyTop);
             dgvOrder.Size = new Size(gridWidth, bodyHeight);
 
             //----------------------------------------
             // تعداد
             //----------------------------------------
-
             int bottomY = bodyTop + bodyHeight + 10;
 
             lblQty.Location = new Point(margin, bottomY + 6);
@@ -780,18 +747,14 @@ namespace CafeManager
             //----------------------------------------
             // سه دکمه + جمع کل در یک ردیف
             //----------------------------------------
-
             btnAdd.Size = new Size(180, 40);
             btnCheckout.Size = new Size(180, 40);
             btnInvoiceManager.Size = new Size(180, 40);
 
             btnAdd.Location = new Point(170, bottomY);
-
             btnCheckout.Location = new Point(370, bottomY);
-
             btnInvoiceManager.Location = new Point(570, bottomY);
 
-            // جمع کل کنار دکمه مدیریت
             lblTotal.Location = new Point(770, bottomY + 8);
             lblTotal.Size = new Size(ClientSize.Width - 780, 25);
             lblTotal.TextAlign = ContentAlignment.MiddleLeft;
@@ -875,30 +838,33 @@ namespace CafeManager
                     Text = "ویرایش تعداد",
                     Size = new Size(250, 180),
                     RightToLeft = RightToLeft.Yes,
-                    StartPosition = FormStartPosition.CenterParent
+                    StartPosition = FormStartPosition.CenterParent,
+                    MaximizeBox = false,
+                    MinimizeBox = false,
+                    FormBorderStyle = FormBorderStyle.FixedDialog
                 };
 
                 Label lbl = new Label { Text = "تعداد جدید:", Location = new Point(30, 30), Size = new Size(100, 25), Font = new Font("Tahoma", 10, FontStyle.Bold) };
+
                 NumericUpDown n = new NumericUpDown
                 {
                     Value = _currentOrder[e.RowIndex].Quantity,
-                    Location = new Point(140, 28),
-                    Size = new Size(70, 25),
-                    Minimum = 1,
-                    Font = new Font("Tahoma", 10)
+                    Location = new Point(30, 60),
+                    Size = new Size(150, 25),
+                    Font = new Font("Tahoma", 10),
+                    Minimum = 1
                 };
 
-                Button b = new Button
+                Button btnSave = new Button
                 {
-                    Text = "تایید تغییرات",
-                    Location = new Point(80, 80),
-                    Size = new Size(100, 35),
+                    Text = "ذخیره",
+                    Location = new Point(30, 100),
+                    Size = new Size(150, 30),
                     BackColor = Color.LightGreen,
-                    Font = new Font("Tahoma", 10, FontStyle.Bold)
+                    FlatStyle = FlatStyle.Flat
                 };
 
-                b.Click += (s, ev) =>
-                {
+                btnSave.Click += (s2, e2) => {
                     _currentOrder[e.RowIndex].Quantity = (int)n.Value;
                     UpdateOrderGrid();
                     f.Close();
@@ -906,7 +872,7 @@ namespace CafeManager
 
                 f.Controls.Add(lbl);
                 f.Controls.Add(n);
-                f.Controls.Add(b);
+                f.Controls.Add(btnSave);
                 f.ShowDialog();
             }
         }
